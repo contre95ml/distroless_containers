@@ -1,1 +1,1 @@
-# Container Distroless :docker:
+# Container Distroless :whale:
