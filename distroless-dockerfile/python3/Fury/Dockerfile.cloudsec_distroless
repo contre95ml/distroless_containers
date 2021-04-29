@@ -1,0 +1,14 @@
+FROM hub.furycloud.io/mercadolibre/python:3.7-runtime-mini as build
+
+FROM python:3.7-slim-buster as build-python
+
+FROM gcr.io/distroless/base-debian10:debug
+COPY --from=build-python /usr/local/bin/python* /usr/bin/
+COPY --from=build-python /usr/local/lib/ /usr/local/lib/
+COPY --from=build-python /lib /lib
+COPY --from=build /usr/local/lib/python3.7/site-packages /usr/local/lib/python3.7/
+COPY --from=build /app /app
+ENV LD_LIBRARY_PATH=/lib:/usr/lib:/usr/local/lib
+WORKDIR /app
+EXPOSE 8080
+ENTRYPOINT ["/usr/bin/python3", "-m", "app"]

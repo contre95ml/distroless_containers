@@ -1,0 +1,8 @@
+FROM hub.furycloud.io/mercadolibre/python:3.7-runtime-mini as build
+
+FROM gcr.io/distroless/python3
+COPY --from=build /usr/local/lib/python3.7/site-packages /usr/lib/python3.7/
+COPY --from=build /app /app
+WORKDIR /app
+EXPOSE 8080
+ENTRYPOINT ["/usr/bin/python3", "-m", "app"]
