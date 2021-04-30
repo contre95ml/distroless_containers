@@ -3,7 +3,7 @@ FROM hub.furycloud.io/mercadolibre/nodejs:14-mini-runtime as builder
 FROM node:current-buster-slim as build-node
 
 FROM gcr.io/distroless/base-debian10:debug
-CCOPY --from=build-node /usr/local/bin/node* /usr/bin/
+COPY --from=build-node /usr/local/bin/node* /usr/bin/
 COPY --from=build-node /usr/local/bin/npm /usr/bin/
 COPY --from=build-node /usr/local/lib/ /usr/local/lib/
 COPY --from=build-node /lib /lib
