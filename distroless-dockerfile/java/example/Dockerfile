@@ -4,7 +4,7 @@ WORKDIR /app
 RUN javac examples/*.java
 RUN jar cfe main.jar examples.HelloJava examples/*.class 
 
-FROM java:11-cloudsec
+FROM java:latest
 COPY --from=build-env /app /app
 WORKDIR /app
 CMD ["main.jar"]

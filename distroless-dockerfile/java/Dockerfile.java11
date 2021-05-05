@@ -1,0 +1,14 @@
+FROM debian:buster
+
+RUN mkdir /debs
+RUN apt update && apt download -y zlib1g libjpeg62-turbo libpng16-16 liblcms2-2 libfreetype6 fonts-dejavu-core fontconfig-config libexpat1 libfontconfig1 libuuid1 libstdc++6 libgcc1
+RUN apt update && apt download -y openjdk-11-jre-headless
+RUN mv *.deb /debs/.
+RUN find /debs -name *.deb -exec dpkg-deb -xv {} /to_install \;
+RUN mkdir -p /to_install/usr/bin/ && ln -s /usr/lib/jvm/java-11-openjdk-amd64/bin/java /to_install/usr/bin/java
+
+FROM gcr.io/distroless/base-debian10:debug
+COPY --from=0 /to_install /
+ENV LANG=C.UTF-8
+ENV JAVA_VERSION=11.0.11
+ENTRYPOINT ["/usr/bin/java", "-jar"]
