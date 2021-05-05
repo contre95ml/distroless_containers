@@ -1,10 +1,17 @@
-FROM python:3.9-slim-buster as build
+FROM python:3.9.5-slim-buster
 
-# Now copy it into our base image.
+RUN mkdir /debs
+RUN apt update && apt download -y libffi6 libncursesw6 libtinfo6 libuuid1
+RUN apt update && apt download -y libexpat1 libbz2-1.0 libc-bin libdb5.3 liblzma5 libmpdec2 libreadline7 libsqlite3-0 libssl1.1 zlib1g dash
+RUN mv *.deb /debs/.
+RUN find /debs -name *.deb -exec dpkg-deb -xv {} /to_install \;
+RUN ldd /usr/local/bin/python3.9 |grep "=> /" | awk '{print "cp --parents "$3 " /to_install/ "}' |sort|uniq |bash
+
 FROM gcr.io/distroless/base-debian10:debug
-COPY --from=build /usr/local/bin/python* /usr/bin/
-COPY --from=build /usr/local/lib/ /usr/local/lib/
-COPY --from=build /lib /lib
-ENV LD_LIBRARY_PATH=/lib:/usr/lib:/usr/local/lib
+COPY --from=0 /usr/local/bin/python3.9 /usr/local/bin/python3.9
+COPY --from=0 /usr/local/lib/python3.9/ /usr/local/lib/python3.9/
+COPY --from=0 /to_install /
+ENV LANG=C.UTF-8
+ENV LD_LIBRARY_PATH=/usr/local/lib
+ENTRYPOINT ["/usr/local/bin/python3.9"]
 
-ENTRYPOINT ["/usr/bin/python3"]

@@ -1,10 +1,13 @@
-FROM python:3.7-slim-buster as build
+FROM debian:buster as build
 
-# Now copy it into our base image.
+RUN mkdir /debs
+RUN apt update && apt download -y libffi6 libncursesw6 libpython3.7-minimal libpython3.7-stdlib libtinfo6 libuuid1 python3-distutils python3.7-minimal
+RUN apt update && apt download -y libexpat1 libbz2-1.0 libc-bin libdb5.3 liblzma5 libmpdec2 libreadline7 libsqlite3-0 libssl1.1 zlib1g dash
+RUN mv *.deb /debs/.
+RUN find /debs -name *.deb -exec dpkg-deb -xv {} /to_install \;
+
 FROM gcr.io/distroless/base-debian10
-COPY --from=build /usr/local/bin/python* /usr/bin/
-COPY --from=build /usr/local/lib/ /usr/local/lib/
-COPY --from=build /lib /lib
-ENV LD_LIBRARY_PATH=/lib:/usr/lib:/usr/local/lib
+ENV LANG=C.UTF-8
+COPY --from=build /to_install /
+ENTRYPOINT ["/usr/bin/python3.7"]
 
-#CMD ["/app"]
